@@ -49,6 +49,13 @@ const userSchema = mongoose.Schema({
   ]
 })
 
+// virtual property --> relationship between entities i.e user and task
+userSchema.virtual('tasks', {
+  ref: 'Task',  // model name
+  localField: '_id',
+  foreignField: 'owner'
+})
+
 userSchema.methods.generateAuthToken = async function () {
   const user = this
   const token = jwt.sign({ _id: user._id.toString() }, 'thisismynewcourse')
