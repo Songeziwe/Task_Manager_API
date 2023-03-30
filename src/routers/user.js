@@ -59,8 +59,11 @@ router.get('/users/me', auth, async (req, res) => {
   res.send(req.user)
 })
 
-router.patch('/users/:id', async (req, res) => {
-  const _id = req.params.id
+// user must be authenticated(logged in) first in order to update user profile
+// this is handled by the auth middleware
+// by verifying the authentication token.
+router.patch('/users/me', auth, async (req, res) => {
+  const { user } = req
   const propertiesToUpdate = Object.keys(req.body)
   const userProperties = ['name', 'email', 'age', 'password']
 
@@ -70,21 +73,18 @@ router.patch('/users/:id', async (req, res) => {
     return res.status(400).send('Invalid field(s) to update.')
 
   try {
-    const user = await User.findById(req.params.id)
-    if(!user) return res.status(404).send('Invalid user id')
-
     propertiesToUpdate.forEach(property => user[property] = req.body[property])
     await user.save()
 
     res.status(201).send(user)
   } catch(e) {
-    res.status(500).send(e.message)
+    res.status(400).send(e.message)
   }
 })
 
 // user must be authenticated(logged in) first in order to delete user profile
 // this is handled by the auth middleware
-// by verifying the authentication.
+// by verifying the authentication token.
 router.delete('/users/me', auth, async (req, res) => {
   try {
     const { user } = req
